@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tracenest-sdk"
+version = "0.1.0"
+description = "A small synchronous Python client for TraceNest Lite"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+dependencies = ["httpx>=0.27,<1.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ status_code }} · TraceNest Lite{% endblock %}
+{% block content %}
+<section class="panel empty-state">
+  <p class="eyebrow">{{ status_code }}</p>
+  <h1>{{ message }}</h1>
+  <p><a class="button" href="/">Back to error groups</a></p>
+</section>
+{% endblock %}

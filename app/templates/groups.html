@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Error groups · TraceNest Lite{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">ERROR MONITORING</p>
+    <h1>A clear view of what broke.</h1>
+    <p class="muted">
+      Track recurring errors. Find the details. Resolve them.
+    </p>
+  </div>
+  <a class="button secondary" href="?{{ request.query_params }}">Refresh</a>
+</div>
+<section class="metrics" aria-label="Workspace totals">
+  <div class="metric"><span>Error groups</span>
+    <strong>{{ totals.groups }}</strong></div>
+  <div class="metric"><span>Unresolved</span>
+    <strong class="warning-text">{{ totals.unresolved }}</strong></div>
+  <div class="metric"><span>Resolved</span>
+    <strong class="success-text">{{ totals.resolved }}</strong></div>
+  <div class="metric"><span>Total occurrences</span>
+    <strong>{{ totals.events }}</strong></div>
+</section>
+<section class="panel">
+  <div class="panel-heading">
+    <h2>Error groups</h2><span class="muted">Most recent first</span>
+  </div>
+  <form class="filters" action="/" method="get">
+    <div class="field">
+      <label for="status">Status</label>
+      <select name="status" id="status">
+        <option value="">All statuses</option>
+        <option value="unresolved"
+          {% if status == 'unresolved' %}selected{% endif %}>
+          Unresolved
+        </option>
+        <option value="resolved"
+          {% if status == 'resolved' %}selected{% endif %}>Resolved</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="application">Application</label>
+      <select name="application" id="application">
+        <option value="">All applications</option>
+        {% for name in applications %}
+        <option value="{{ name }}"
+          {% if application == name %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="button" type="submit">Apply filters</button>
+    {% if status or application %}<a href="/">Clear</a>{% endif %}
+  </form>
+  {% if groups %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th scope="col">Exception / application</th>
+        <th scope="col">Status</th><th scope="col">Occurrences</th>
+        <th scope="col">Last seen (UTC)</th>
+      </tr></thead>
+      <tbody>
+        {% for group in groups %}
+        <tr>
+          <td>
+            <a class="error-link" href="/groups/{{ group.id }}">
+              {{ group.exception_type }} <span aria-hidden="true">↗</span>
+            </a>
+            <div class="muted cell-note">
+              {{ group.application or 'Unnamed application' }}
+            </div>
+          </td>
+          <td><span class="badge {{ group.status }}">
+            {{ group.status | capitalize }}
+          </span></td>
+          <td class="count">{{ group.occurrences }}</td>
+          <td><time datetime="{{ group.last_seen.isoformat() }}">
+            {{ group.last_seen.strftime('%d %b %Y · %H:%M:%S') }}
+          </time></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    {% if status or application %}
+    <h3>No groups match these filters.</h3>
+    <p>Try another application or <a href="/">clear the filters</a>.</p>
+    {% else %}
+    <h3>Your workspace is ready.</h3>
+    <p>Send your first exception with the Python SDK to see it here.</p>
+    <code>python examples/capture_exception.py</code>
+    {% endif %}
+  </div>
+  {% endif %}
+  {% include "pagination.html" %}
+</section>
+{% endblock %}

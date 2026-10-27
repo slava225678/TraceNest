@@ -1,0 +1,13 @@
+<nav class="pagination" aria-label="Pagination">
+  <div>
+    {% if previous_url %}
+    <a class="button secondary" href="{{ previous_url }}">← Previous</a>
+    {% endif %}
+  </div>
+  <span class="muted">Page {{ page }}</span>
+  <div>
+    {% if next_url %}
+    <a class="button secondary" href="{{ next_url }}">Next →</a>
+    {% endif %}
+  </div>
+</nav>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}TraceNest Lite{% endblock %}</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="topbar">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true">T</span>
+      TraceNest <span class="muted">Lite</span>
+    </a>
+    <nav aria-label="Main navigation">
+      <a href="/">Error groups</a>
+      <a href="/docs">API docs <span aria-hidden="true">↗</span></a>
+      <span class="local-label">Local workspace</span>
+    </nav>
+  </header>
+  <main id="main" class="workspace">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="footer">
+    TraceNest Lite · Python error tracking
+    <span>All timestamps in UTC · Local development</span>
+  </footer>
+</body>
+</html>

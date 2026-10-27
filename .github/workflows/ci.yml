@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      COMPOSE_PROJECT_NAME: tracenest-ci
+      POSTGRES_DB: tracenest_ci
+      POSTGRES_USER: tracenest_ci
+      POSTGRES_PASSWORD: ci-only-password
+      TRACENEST_API_KEY: ci-only-key
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Build API image
+        run: docker compose build api
+      - name: Lint, format, test on PostgreSQL, and build SDK
+        run: docker compose --profile test run --build --rm tests
+      - name: Show service logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+      - name: Clean up the isolated CI environment
+        if: always()
+        run: docker compose --profile test down --volumes --remove-orphans

@@ -1,0 +1,40 @@
+x-database-url: &database-url "postgresql+psycopg://${POSTGRES_USER}:\
+  ${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  api:
+    build: .
+    environment:
+      DATABASE_URL: *database-url
+      TRACENEST_API_KEY: ${TRACENEST_API_KEY:-development-key}
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+  tests:
+    profiles: ["test"]
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      DATABASE_URL: *database-url
+      TRACENEST_API_KEY: test-key
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  postgres_data:

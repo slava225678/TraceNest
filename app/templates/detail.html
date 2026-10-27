@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}{{ group.exception_type }} · TraceNest Lite{% endblock %}
+{% block content %}
+<a class="back-link" href="/">← All error groups</a>
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">{{ group.application or 'Unnamed application' }}</p>
+    <h1>{{ group.exception_type }}</h1>
+    <p class="muted">One group. Every occurrence preserved.</p>
+  </div>
+  <span class="badge large {{ group.status }}">
+    {{ group.status | capitalize }}
+  </span>
+</div>
+<section class="metrics detail-metrics" aria-label="Group summary">
+  <div class="metric"><span>Occurrences</span>
+    <strong>{{ group.occurrences }}</strong></div>
+  <div class="metric"><span>First seen (UTC)</span>
+    <time datetime="{{ group.first_seen.isoformat() }}">
+      {{ group.first_seen.strftime('%d %b %Y · %H:%M:%S') }}
+    </time></div>
+  <div class="metric"><span>Last seen (UTC)</span>
+    <time datetime="{{ group.last_seen.isoformat() }}">
+      {{ group.last_seen.strftime('%d %b %Y · %H:%M:%S') }}
+    </time></div>
+</section>
+<div class="detail-grid">
+  <div class="detail-main">
+    <section class="panel">
+      <div class="panel-heading"><h2>Traceback</h2>
+        {% if selected %}<span class="muted">
+          {{ selected.created_at.strftime('%d %b · %H:%M:%S UTC') }}
+        </span>{% endif %}
+      </div>
+      {% if selected %}
+      <div class="message">{{ selected.message or '(No error message)' }}</div>
+      <pre class="traceback" tabindex="0"
+        aria-label="Exception traceback"><code>{{
+          selected.traceback }}</code></pre>
+      <p class="event-id">Event ID <code>{{ selected.id }}</code></p>
+      {% else %}
+      <div class="empty-state">No events are available for this group.</div>
+      {% endif %}
+    </section>
+    <section class="panel history">
+      <div class="panel-heading"><h2>Occurrence history</h2>
+        <span class="muted">Most recent first</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">Received event (UTC)</th>
+            <th scope="col">Message</th></tr></thead>
+          <tbody>
+            {% for item in history %}
+            <tr {% if selected and item.id == selected.id %}
+              class="selected-row"{% endif %}>
+              <td><a href="?event_id={{ item.id }}&amp;offset={{
+                request.query_params.get('offset', '0') }}">
+                {{ item.created_at.strftime('%d %b %Y · %H:%M:%S') }}
+              </a></td>
+              <td class="history-message">
+                {{ item.message or '(No error message)' }}
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="2">No events on this page.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "pagination.html" %}
+    </section>
+  </div>
+  <aside>
+    <section class="panel action-panel">
+      <h2>Update status</h2>
+      <p class="muted">New occurrences automatically reopen this group.</p>
+      <form id="status-form" method="post"
+        data-endpoint="/api/v1/groups/{{ group.id }}">
+        <fieldset id="status-fields" disabled>
+          <label for="api-key">API key</label>
+          <input id="api-key" type="password" required
+            autocomplete="off" spellcheck="false"
+            placeholder="Enter your local API key">
+          <p class="hint">Used for this action only. Never saved.</p>
+          <label for="new-status">Status</label>
+          <select id="new-status">
+            <option value="resolved"
+              {% if group.status == 'unresolved' %}selected{% endif %}>
+              Resolved
+            </option>
+            <option value="unresolved"
+              {% if group.status == 'resolved' %}selected{% endif %}>
+              Unresolved
+            </option>
+          </select>
+          <button class="button" type="submit">Save status</button>
+        </fieldset>
+        <p id="status-feedback" role="status" aria-live="polite"></p>
+      </form>
+      <noscript>Enable JavaScript to change the status.</noscript>
+    </section>
+    <section class="panel identity-panel">
+      <h2>Group identity</h2>
+      <dl><dt>Group ID</dt><dd><code>{{ group.id }}</code></dd>
+        <dt>Fingerprint</dt><dd><code>{{ group.fingerprint }}</code></dd>
+      </dl>
+    </section>
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+[tool.ruff]
+line-length = 79
+target-version = "py312"
+src = [".", "sdk/src"]
+extend-exclude = ["venv", ".venv", "build", "dist", "*.egg-info"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.ruff.format]
+line-ending = "lf"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
