@@ -70,7 +70,7 @@ class TraceNestClient:
             while len(body) > MAX_BODY_BYTES:
                 # Keep the final frames and exception summary when trimming.
                 trace = payload["traceback"]
-                payload["traceback"] = trace[-max(1, len(trace) // 2) :]
+                payload["traceback"] = trace[-max(1, len(trace) // 2):]
                 body = self._encode(payload)
             response = self._http.post(
                 self._endpoint,

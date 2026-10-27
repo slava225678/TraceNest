@@ -27,6 +27,7 @@ def check_line_lengths() -> None:
         ".gitattributes",
         ".gitignore",
         ".dockerignore",
+        ".gitignore",
     }
     root_suffixes = suffixes | {".md", ".txt", ".ini"}
     files = [
