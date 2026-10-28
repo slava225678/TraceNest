@@ -253,10 +253,13 @@ docker compose --profile test run --build --rm tests
 This runs the same checks as `.github/workflows/ci.yml`:
 
 1. Ruff linting and import ordering.
-2. Ruff formatting verification.
-3. A strict 79-character limit for source and project configuration files.
-4. Pytest with PostgreSQL.
-5. SDK source distribution and wheel builds.
+2. Pytest with PostgreSQL.
+3. SDK source distribution and wheel builds.
+
+Formatting verification is optional and is not run by the check script.
+There is no separate line-length check for project configuration files.
+The current Ruff lint rules include `E501` for Python line length, with a
+configured limit of 79 characters.
 
 To run only tests:
 
@@ -278,10 +281,6 @@ To apply formatting/import fixes, use `python -m ruff check --fix .` and
 `pyproject.toml`; `.editorconfig` and `.gitattributes` align editor settings
 and line endings across Windows and Linux. Ruff is pinned so formatting
 does not change silently between installations.
-
-The formatter uses a target width rather than an absolute guarantee, so the
-check script also rejects every overlong line in the selected source files.
-See [Ruff configuration](https://docs.astral.sh/ruff/configuration/).
 
 The GitHub workflow runs on pushes, pull requests, and manual dispatch.
 It builds the API image and runs the test image with an isolated PostgreSQL
@@ -347,15 +346,27 @@ are unauthenticated, and tracebacks may contain sensitive information. Compose
 binds the API to `127.0.0.1`; keep it local. Retention policies and rate
 limiting are not implemented yet.
 
-## Publishing the repository
+## Release preparation
 
-The workflow file is ready but GitHub can run it only after the repository
-is pushed. Before the first commit, review `git status --short` and confirm
-that `.env`, virtual environments, caches, and build output are ignored.
-Commit `.env.example` with local example credentials only.
+Before committing, review `git status --short` and confirm that `.env`,
+virtual environments, caches, and build output are ignored. Commit
+`.env.example` with local example credentials only.
 
-Create an empty GitHub repository, add its URL as `origin`, and push your
-reviewed commits on `main`. Check the first workflow run in the Actions tab.
+Run the Docker check command above, then review the GitHub Actions result
+for the commit you intend to release. The repository owner publishes tags
+and GitHub releases manually. Release notes for the initial version are in
+[docs/releases/v0.1.0.md](docs/releases/v0.1.0.md).
+
+The check script builds the SDK wheel and source distribution in `dist/sdk`
+inside the test container. The standard `--rm` command removes that container
+and its build output. To keep archives on the host, run this from the
+repository root after installing the optional local tooling:
+
+```bash
+python -m build --no-isolation --outdir dist/sdk sdk
+```
+
+GitHub Actions validates these builds but does not upload release assets.
 No GitHub release, PyPI publication, or external deployment is automatic.
 
 ## License

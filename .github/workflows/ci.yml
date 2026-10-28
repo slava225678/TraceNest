@@ -28,7 +28,7 @@ jobs:
           persist-credentials: false
       - name: Build API image
         run: docker compose build api
-      - name: Lint, format, test on PostgreSQL, and build SDK
+      - name: Lint, test on PostgreSQL, and build SDK
         run: docker compose --profile test run --build --rm tests
       - name: Show service logs on failure
         if: failure()
